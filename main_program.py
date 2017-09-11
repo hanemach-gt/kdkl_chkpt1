@@ -17,6 +17,8 @@ def safe_get_positive_int(trait):
                 print("Year of birth cannot be negative.")
                 num = 0  # make our loop ask again
 
+    return num
+
 
 def safe_get_student_from_input():
     # returns a list of tokens as below
@@ -104,7 +106,7 @@ def delete_student_by_id(students, uid):
     index = 0
     # data fmt: id,name,surname,year​ of​ birth,class,average​ grade,average​ presence
     for i in range(len(students)):
-        if student[i][0] == uid:
+        if students[i][0] == uid:
             index = i
             uid_exists = True
             break # design implies that there is only one instance of uid
@@ -133,12 +135,12 @@ def is_valid_uid(uid):
             uid[3] in lowers
 
 # returns False if it was chosen to quit, else the student list
-def handle_eligible_operation(index, options):
+def handle_eligible_option(index, options):
     students = data.import_data_from_file()
-    if options.index("Print all students") == operation:
+    if options.index("Print all students") == index:
         display.print_students_list(students)
 
-    elif options.index("Get student by id") == operation:
+    elif options.index("Get student by id") == index:
         uid = ""
         while not is_valid_uid(uid):
             uid = input("\n Please provide a valid id: ")
@@ -150,18 +152,20 @@ def handle_eligible_operation(index, options):
         else:
             display.print_student_info(student)
 
-    elif options.index("Get youngest student") == operation:
+    elif options.index("Get youngest student") == index:
         youngest = data.get_youngest_student(students)
+        display.print_student_info(youngest)
 
-    elif options.index("Get oldest student") == operation:
+    elif options.index("Get oldest student") == index:
         oldest = data.get_oldest_student(students)
+        display.print_student_info(oldest)
 
-    elif options.index("Add new student") == operation:
+    elif options.index("Add new student") == index:
         new_student = safe_get_student_from_input()
         students = add_new_student(students, new_student)
         return students
 
-    elif options.index("Delete student by id") == operation:
+    elif options.index("Delete student by id") == index:
         uid = ""
         while not is_valid_uid(uid):
             uid = input("\n Please provide a valid id: ")
@@ -172,7 +176,7 @@ def handle_eligible_operation(index, options):
             print("Student with such id does not exist")
         else:
             students = delete_student_by_id(students, uid)
-    elif options.index("x") == operation:
+    elif options.index("x") == index:
         print("quitting...")
         return False
 

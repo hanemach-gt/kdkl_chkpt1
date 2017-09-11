@@ -10,4 +10,4 @@ Q9(k,Andrzej,Modulny,1991,A,88,84
 K8^t,Katarzyna,Gdowski,1991,B,88,74
 Z7*r,Anna,Zmienna,1996,A,94,87
 R6$o,Cyprian,Norwid,1987,A,95,79
-E4)i,Barbara,Loremska,1991,B,76,61
+H1_q,Michal,Hanebach,1996,B,7,7
