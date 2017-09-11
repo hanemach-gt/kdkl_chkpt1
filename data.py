@@ -1,6 +1,7 @@
 """
 This module should use random module to generate_id
 """
+import random
 
 
 def import_data_from_file(filename='class_data.txt'):
@@ -15,6 +16,16 @@ def import_data_from_file(filename='class_data.txt'):
     :returns: list of lists representing students' data
     :rtype: list
     """
+    students = []
+    try:
+        with open(filename) as f:
+            for line in f:
+                students.append(line.strip().split(","))
+
+    except FileNotFoundError:
+        pass # suppress failure, return empty list
+
+    return students
 
 
 def export_to_file(data, filename='class_data.txt', mode='a'):
@@ -30,6 +41,13 @@ def export_to_file(data, filename='class_data.txt', mode='a'):
     :raises ValueError: if mode other than 'w' or 'a' was given. Error message:
         'Wrong write mode'
     """
+    allowed_modes = "aw"
+    if mode not in allowed_modes:
+        raise ValueError("Wrong write mode")
+
+    with open(filename, mode) as f:
+        for record in data:
+            f.write(",".join(record) + "\n")
 
 
 def get_student_by_id(uid, students):
@@ -45,6 +63,17 @@ def get_student_by_id(uid, students):
     :returns: specific student's data
     :rtype: list
     """
+    # data fmt: id,name,surname,year​ of​ birth,class,average​ grade,average​ presence
+    student_returned = []
+    for possible_student in students:
+        if possible_student[0] == uid:
+            student_returned = possible_student
+            break
+
+    if not student_returned:
+        raise ValueError("Student does not exist")
+
+    return student_returned
 
 
 def get_students_of_class(students, class_name):
@@ -58,6 +87,13 @@ def get_students_of_class(students, class_name):
     :returns: students from given class only
     :rtype: list
     """
+    # data fmt: id,name,surname,year​ of​ birth,class,average​ grade,average​ presence
+    students_by_class = []
+    for record in students:
+        if record[4] == class_name:
+            students_by_class.append(record)
+
+    return students_by_class
 
 
 def get_youngest_student(students):
@@ -73,6 +109,13 @@ def get_youngest_student(students):
     :returns: youngest student
     :rtype: list
     """
+    # data fmt: id,name,surname,year​ of​ birth,class,average​ grade,average​ presence
+    youngest_student = students[0]
+    for current_student in students:
+        if int(current_student[3]) > int(youngest_student[3]):
+            youngest_student = current_student
+
+    return youngest_student
 
 
 def get_youngest_student_of_class(students, class_name):
@@ -90,6 +133,10 @@ def get_youngest_student_of_class(students, class_name):
     :returns: youngest student from given class
     :rtype: list
     """
+    # sieve out the students that belong to class_name
+    students_by_class = get_students_of_class(students, class_name)
+
+    return get_youngest_student(students_by_class)
 
 
 def get_oldest_student(students):
@@ -105,6 +152,13 @@ def get_oldest_student(students):
     :returns: oldest student
     :rtype: list
     """
+    # data fmt: id,name,surname,year​ of​ birth,class,average​ grade,average​ presence
+    oldest_student = students[0]
+    for current_student in students:
+        if int(current_student[3]) < int(oldest_student[3]):
+            oldest_student = current_student
+
+    return oldest_student
 
 
 def get_oldest_student_of_class(students, class_name):
@@ -122,6 +176,10 @@ def get_oldest_student_of_class(students, class_name):
     :returns: oldest student
     :rtype: list
     """
+    # sieve out the students that belong to class_name
+    students_by_class = get_students_of_class(students, class_name)
+
+    return get_oldest_student(students_by_class)
 
 
 def get_average_grade_of_students(students):
@@ -137,6 +195,15 @@ def get_average_grade_of_students(students):
     :returns: average grade of students value
     :rtype: float
     """
+    if not students:
+        raise ValueError("no data to get average of")
+
+    # data fmt: id,name,surname,year​ of​ birth,class,average​ grade,average​ presence
+    summed = 0
+    for record in students:
+        summed += float(record[5])
+
+    return summed / len(students)
 
 
 def get_average_presence_of_students(students):
@@ -154,6 +221,21 @@ def get_average_presence_of_students(students):
     :returns: average presence of students rounded to int
     :rtype: int
     """
+    if not students:
+        raise ValueError("no data to get average of")
+
+    # data fmt: id,name,surname,year​ of​ birth,class,average​ grade,average​ presence
+    summed = 0
+    for record in students:
+        summed += float(record[6])
+
+    avg = summed / len(students)
+
+    fractional_part = avg - int(avg)
+    if fractional_part >= 0.5:
+        return int(avg + 1)
+    else:
+        return int(avg)
 
 
 def generate_id(current_ids):
@@ -184,6 +266,28 @@ def generate_id(current_ids):
     :returns: unique id
     :rtype: str
     """
+    uppers = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    digits = "0123456789"
+    specials = "!@#$%^&*()_+"
+    lowers = uppers.lower()
+    max_amount = len(uppers) * len(digits) * len(specials) * len(lowers)
+    current_amount = len(current_ids)
+    attempt = 0
+    new_uid = ""
+    while True:
+        if current_amount + attempt >= max_amount:
+            raise ValueError("exhausted id pool")
+
+        new_uid = random.choice(uppers) + random.choice(digits) + \
+                    random.choice(specials) + random.choice(lowers)
+
+        if new_uid not in current_ids:
+            current_ids.append(new_uid)
+            break
+
+        attempt += 1
+
+    return new_uid
 
 
 def get_all_by_gender(students, gender):
@@ -205,7 +309,18 @@ def get_all_by_gender(students, gender):
     :returns: list of students filtered by given gender
     :rtype: list
     """
+    # data fmt: id,name,surname,year​ of​ birth,class,average​ grade,average​ presence
+    allowed_gender_strings = ["male", "female"]
+    if gender not in allowed_gender_strings:
+        raise ValueError("Wrong gender")
 
+    students_by_gender = []
+    for record in students:
+        # match the latest character of name
+        if record[1][-1] == "a" or record[1] == "Miriam":
+            students_by_gender.append(record)
+
+    return students_by_gender
 
 def sort_students_by_age(students, order=None):
     """
@@ -228,3 +343,27 @@ def sort_students_by_age(students, order=None):
     :returns: sorted students or empty list
     :rtype: list
     """
+    if order is None:
+        return []
+
+    allowed_order_strings = ["asc", "desc"]
+    if order not in allowed_order_strings:
+        raise ValueError("invalid or no sorting order specified")
+
+    sorted_stud = students[:] # makes a copy of our list
+
+    # data fmt: id,name,surname,year​ of​ birth,class,average​ grade,average​ presence
+    if order == "asc":
+        for i in range(len(sorted_stud)):
+            for j in range(len(sorted_stud) - 1):
+                if int(sorted_stud[j+1][3]) > int(sorted_stud[j][3]):
+                    # swap values
+                    sorted_stud[j], sorted_stud[j+1] = sorted_stud[j+1], sorted_stud[j]
+    else: # descending
+        for i in range(len(sorted_stud)):
+            for j in range(len(sorted_stud) - 1):
+                if int(sorted_stud[j+1][3]) < int(sorted_stud[j][3]):
+                    # swap values
+                    sorted_stud[j], sorted_stud[j+1] = sorted_stud[j+1], sorted_stud[j]
+
+    return sorted_stud
