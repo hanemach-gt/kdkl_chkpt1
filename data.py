@@ -348,7 +348,7 @@ def sort_students_by_age(students, order=None):
 
     allowed_order_strings = ["asc", "desc"]
     if order not in allowed_order_strings:
-        raise ValueError("invalid or no sorting order specified")
+        raise ValueError("Wrong order")
 
     sorted_stud = students[:] # makes a copy of our list
 
@@ -356,13 +356,13 @@ def sort_students_by_age(students, order=None):
     if order == "asc":
         for i in range(len(sorted_stud)):
             for j in range(len(sorted_stud) - 1):
-                if int(sorted_stud[j+1][3]) > int(sorted_stud[j][3]):
+                if int(sorted_stud[j+1][3]) < int(sorted_stud[j][3]):
                     # swap values
                     sorted_stud[j], sorted_stud[j+1] = sorted_stud[j+1], sorted_stud[j]
     else: # descending
         for i in range(len(sorted_stud)):
             for j in range(len(sorted_stud) - 1):
-                if int(sorted_stud[j+1][3]) < int(sorted_stud[j][3]):
+                if int(sorted_stud[j+1][3]) > int(sorted_stud[j][3]):
                     # swap values
                     sorted_stud[j], sorted_stud[j+1] = sorted_stud[j+1], sorted_stud[j]
 
