@@ -5,6 +5,19 @@ import data
 import display
 
 
+def safe_get_positive_int(trait):
+    num = 0
+    while not num:
+        try:
+            num = int(input("\n Please provide student\'s %s: " % (trait)))
+        except ValueError:
+            print("%s has to be a positive numeral." % (trait.capitalize()))
+        else:
+            if num < 0:
+                print("Year of birth cannot be negative.")
+                num = 0  # make our loop ask again
+
+
 def safe_get_student_from_input():
     # returns a list of tokens as below
     # data fmt: name,surname,year​ of​ birth,class,average​ grade,average​ presence
@@ -20,22 +33,23 @@ def safe_get_student_from_input():
 
     birthyear = 0
     while not birthyear:
-        try:
-            birthyear = int(input("\n Please provide student\'s year of birth: "))
-        except ValueError:
-            print("Year of birth has to be a positive numeral.")
-
-        if birthyear < 0:
-            print("Year of birth cannot be negative.")
-            birthyear = 0  # make our loop ask again
+        birthyear = safe_get_positive_int("year of birth")
 
     class_id = ""
     while not class_id:
         class_id = input("\n Please provide student class: ")
     class_id = class_id.capitalize()
 
+    avg_grade = 0
+    while not avg_grade:
+        avg_grade = safe_get_positive_int("average grade")
+
+    avg_presence = 0
+    while not avg_presence:
+        avg_presence = safe_get_positive_int("average presence")
+
     # data fmt: name,surname,year​ of​ birth,class,average​ grade,average​ presence
-    return [ name, surname, str(birthyear), class_id, str(0), str(0) ]
+    return [ name, surname, str(birthyear), class_id, str(avg_grade), str(avg_presence) ]
 
 
 def add_new_student(students, new_student):
@@ -118,6 +132,51 @@ def is_valid_uid(uid):
             uid[2] in specials and \
             uid[3] in lowers
 
+# returns False if it was chosen to quit, else the student list
+def handle_eligible_operation(index, options):
+    students = data.import_data_from_file()
+    if options.index("Print all students") == operation:
+        display.print_students_list(students)
+
+    elif options.index("Get student by id") == operation:
+        uid = ""
+        while not is_valid_uid(uid):
+            uid = input("\n Please provide a valid id: ")
+
+        try:
+            student = data.get_student_by_id(uid, students)
+        except ValueError:
+            print("Student with such id does not exist")
+        else:
+            display.print_student_info(student)
+
+    elif options.index("Get youngest student") == operation:
+        youngest = data.get_youngest_student(students)
+
+    elif options.index("Get oldest student") == operation:
+        oldest = data.get_oldest_student(students)
+
+    elif options.index("Add new student") == operation:
+        new_student = safe_get_student_from_input()
+        students = add_new_student(students, new_student)
+        return students
+
+    elif options.index("Delete student by id") == operation:
+        uid = ""
+        while not is_valid_uid(uid):
+            uid = input("\n Please provide a valid id: ")
+
+        try:
+            student = data.get_student_by_id(uid, students)
+        except ValueError:
+            print("Student with such id does not exist")
+        else:
+            students = delete_student_by_id(students, uid)
+    elif options.index("x") == operation:
+        print("quitting...")
+        return False
+
+    return True
 
 def main():
     """
@@ -136,37 +195,13 @@ def main():
     while True:
         display.print_program_menu(options)
         try:
-            operation = int(input("\n Please choose one of the options [%u...%u]" % (0, len(options) - 1)))
+            index = int(input("\n Please choose one of the options [%u...%u]" % (0, len(options) - 1)))
         except ValueError:
             print("Invalid input.")
         else:
-            if operation in range(len(operations)):
-                students = data.import_data_from_file()
-                if options.index("Print all students") == operation:
-                    display.print_students_list(students)
-
-                elif options.index("Get student by id") == operation:
-                    uid = ""
-                    while not is_valid_uid(uid):
-                        uid = input("\n Please provide a valid id: ")
-
-                    try:
-                        student = data.get_student_by_id(uid, students)
-                    except ValueError:
-                        print("Student with such id does not exist")
-                    else:
-                        display.print_student_info(student)
-
-                elif options.index("Get youngest student") == operation:
-                    youngest = data.get_youngest_student(students)
-
-                elif options.index("Get oldest student") == operation:
-                    oldest = data.get_oldest_student(students)
-
-                elif options.index("Add new student") == operation:
-                    new_student = safe_get_student_from_input()
-                    students = add_new_student(students, new_student)
-
+            if index in range(len(options)):
+                if handle_eligible_option(index, options) == False: # returns False on exit request
+                    break
             else:
                 print("Choice numeral out of range")
 
