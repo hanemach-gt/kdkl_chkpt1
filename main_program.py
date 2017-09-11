@@ -73,6 +73,8 @@ def add_new_student(students, new_student):
     # note: export function expects a list of lists
     data.export_to_file([student_added])
 
+    return students
+
 
 def delete_student_by_id(students, uid):
     """
@@ -96,9 +98,25 @@ def delete_student_by_id(students, uid):
     if uid_exists:
         updated = students[:] # make a copy
         del updated[index]
+        data.export_to_file(updated, "class_data.txt", "w")  #overwrite file
         return updated
     else:
         return students
+
+
+def is_valid_uid(uid):
+    if len(uid) != 4:
+        return False
+
+    uppers = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    digits = "0123456789"
+    specials = "!@#$%^&*()_+"
+    lowers = uppers.lower()
+
+    return uid[0] in uppers and \
+            uid[1] in digits and \
+            uid[2] in specials and \
+            uid[3] in lowers
 
 
 def main():
@@ -123,12 +141,31 @@ def main():
             print("Invalid input.")
         else:
             if operation in range(len(operations)):
+                students = data.import_data_from_file()
                 if options.index("Print all students") == operation:
-                    students = data.import_data_from_file()
                     display.print_students_list(students)
 
                 elif options.index("Get student by id") == operation:
-                    pass
+                    uid = ""
+                    while not is_valid_uid(uid):
+                        uid = input("\n Please provide a valid id: ")
+
+                    try:
+                        student = data.get_student_by_id(uid, students)
+                    except ValueError:
+                        print("Student with such id does not exist")
+                    else:
+                        display.print_student_info(student)
+
+                elif options.index("Get youngest student") == operation:
+                    youngest = data.get_youngest_student(students)
+
+                elif options.index("Get oldest student") == operation:
+                    oldest = data.get_oldest_student(students)
+
+                elif options.index("Add new student") == operation:
+                    new_student = safe_get_student_from_input()
+                    students = add_new_student(students, new_student)
 
             else:
                 print("Choice numeral out of range")
