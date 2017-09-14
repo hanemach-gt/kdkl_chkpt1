@@ -14,7 +14,7 @@ def safe_get_positive_int(trait):
             print("%s has to be a positive numeral." % (trait.capitalize()))
         else:
             if num < 0:
-                print("Year of birth cannot be negative.")
+                print("%s cannot be negative." % (trait.capitalize()))
                 num = 0  # make our loop ask again
 
     return num
@@ -134,7 +134,7 @@ def is_valid_uid(uid):
             uid[2] in specials and \
             uid[3] in lowers
 
-# returns False if it was chosen to quit, else the student list
+# returns False if it was chosen to quit, True otherwise
 def handle_eligible_option(index, options):
     students = data.import_data_from_file()
     if options.index("Print all students") == index:
